@@ -39,7 +39,16 @@ class Airport(models.Model):
 
 
 class Airline(models.Model):
-    pass
+    airline_id = models.PositiveSmallIntegerField(unique=True)
+    name = models.CharField(max_length=1000)
+    alias = models.CharField(max_length=1000)
+    iata = models.CharField(max_length=2)
+    icao = models.CharField(max_length=3)
+    callsign = models.CharField(max_length=1000)
+    country = models.CharField(max_length=1000)
+    active = models.BooleanField()
+
+    objects = BaseManager()
 
 
 class Route(models.Model):
