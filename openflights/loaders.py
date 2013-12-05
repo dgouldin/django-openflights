@@ -19,9 +19,6 @@ def load_airport(row):
     )
     defaults = dict(zip(field_names, row))
     airport_id = defaults.pop('airport_id')
-    try:
-        airport, _ = Airport.objects.update_or_create(airport_id=airport_id,
-                                                      defaults=defaults)
-    except Exception as e:
-        import ipdb; ipdb.set_trace()
+    airport, _ = Airport.objects.update_or_create(airport_id=airport_id,
+                                                  defaults=defaults)
     return airport

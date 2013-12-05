@@ -21,3 +21,4 @@ class Command(BaseCommand):
                 load(row)
                 sys.stdout.write('.')
                 sys.stdout.flush()
+        sys.stdout.write('\nLoading complete.\n')
