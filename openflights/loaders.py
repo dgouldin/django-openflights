@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from .models import Airport, Airline
+from .models import Airport, Airline, Route
 
 
 def load_airport(row):
@@ -39,3 +39,35 @@ def load_airline(row):
     defaults['active'] = defaults['active'] == 'Y'
     airline, _ = Airline.objects.update_or_create(airline_id=airline_id,
                                                  defaults=defaults)
+
+    return airline
+
+def load_route(row):
+    row_cleaned = ['' if i == '\N' else i for i in row]
+    (
+        _, airline_id,
+        _, source_airport_id,
+        _, dest_airport_id,
+        codeshare,
+        stops,
+        equipment,
+    ) = row_cleaned
+
+    if not all([airline_id, source_airport_id, dest_airport_id]):
+        return
+
+    airline = Airline.objects.get(airline_id=airline_id)
+    source_airport = Airport.objects.get(airport_id=source_airport_id)
+    dest_airport = Airport.objects.get(airport_id=dest_airport_id)
+    codeshare = codeshare == 'Y'
+
+    route, _ = Route.objects.update_or_create(airline=airline,
+                                              source_airport=source_airport,
+                                              destination_airport=dest_airport,
+                                              defaults={
+                                                  'codeshare': codeshare,
+                                                  'stops': stops,
+                                                  'equipment': equipment,
+                                              })
+
+    return route

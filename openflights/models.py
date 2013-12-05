@@ -52,7 +52,20 @@ class Airline(models.Model):
 
 
 class Route(models.Model):
-    pass
+    airline = models.ForeignKey(Airline, related_name='routes')
+    source_airport = models.ForeignKey(Airport, related_name='source_routes')
+    destination_airport = models.ForeignKey(Airport,
+                                            related_name='destination_routes')
+    codeshare = models.BooleanField()
+    stops = models.IntegerField()
+    equipment = models.CharField(max_length=1000)
+
+    objects = BaseManager()
+
+    class Meta:
+        unique_together = (
+            ('airline', 'source_airport', 'destination_airport'),
+        )
 
 
 class Schedule(models.Model):
