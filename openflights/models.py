@@ -37,6 +37,9 @@ class Airport(models.Model):
 
     objects = BaseManager()
 
+    def __unicode__(self):
+        return '{0} ({1})'.format(self.name, self.iata_faa)
+
 
 class Airline(models.Model):
     airline_id = models.PositiveSmallIntegerField(unique=True)
@@ -49,6 +52,9 @@ class Airline(models.Model):
     active = models.BooleanField()
 
     objects = BaseManager()
+
+    def __unicode__(self):
+        return '{0} ({1})'.format(self.name, self.callsign)
 
 
 class Route(models.Model):
@@ -67,6 +73,7 @@ class Route(models.Model):
             ('airline', 'source_airport', 'destination_airport'),
         )
 
-
-class Schedule(models.Model):
-    pass
+    def __unicode__(self):
+        return '{0}: {1} -> {2}'.format(self.airline.callsign,
+                                        self.source_airport.iata_faa,
+                                        self.destination_airport.iata_faa)
