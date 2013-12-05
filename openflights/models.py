@@ -1,7 +1,10 @@
+from __future__ import absolute_import
+
 from django.db import models
 
-class Airport(models.Model):
+from .managers import BaseManager
 
+class Airport(models.Model):
     DST_EUROPE = 'E'
     DST_US_CANADA = 'A'
     DST_SOUTH_AMERICA = 'S'
@@ -20,7 +23,7 @@ class Airport(models.Model):
         (DST_UNKNOWN, 'Unkonwn'),
     )
 
-    airport_id = models.PositiveSmallIntegerField(db_index=True)
+    airport_id = models.PositiveSmallIntegerField(unique=True)
     name = models.CharField(max_length=1000)
     city = models.CharField(max_length=1000)
     country = models.CharField(max_length=1000)
@@ -29,14 +32,19 @@ class Airport(models.Model):
     latitude = models.DecimalField(max_digits=8, decimal_places=6)
     longitude = models.DecimalField(max_digits=9, decimal_places=6)
     altitude = models.IntegerField()
-    timezone = models.DecimalField(max_digits=4, decimal_places=2)
+    timezone = models.DecimalField(max_digits=5, decimal_places=2)
     dst = models.CharField(max_length=1, choices=DST_CHOICES)
+
+    objects = BaseManager()
+
 
 class Airline(models.Model):
     pass
 
+
 class Route(models.Model):
     pass
+
 
 class Schedule(models.Model):
     pass
