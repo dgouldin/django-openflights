@@ -2,6 +2,8 @@ from __future__ import absolute_import
 
 from .models import Airport, Airline, Route
 
+def clean_row(row):
+    return ['' if i == '\N' else i.replace('\\\\', '\\') for i in row]
 
 def load_airport(row):
     field_names = (
@@ -17,8 +19,11 @@ def load_airport(row):
         'timezone',
         'dst',
     )
-    defaults = dict(zip(field_names, row))
-    airport_id = defaults.pop('airport_id')
+    defaults = dict(zip(field_names, clean_row(row)))
+    airport_id = int(defaults.pop('airport_id'))
+    if airport_id <= 0:
+        return
+
     airport, _ = Airport.objects.update_or_create(airport_id=airport_id,
                                                   defaults=defaults)
     return airport
@@ -34,16 +39,21 @@ def load_airline(row):
         'country',
         'active',
     )
-    defaults = dict(zip(field_names, row))
-    airline_id = defaults.pop('airline_id')
+    defaults = dict(zip(field_names, clean_row(row)))
+    airline_id = int(defaults.pop('airline_id'))
+    if airline_id <= 0:
+        return
+
     defaults['active'] = defaults['active'] == 'Y'
-    airline, _ = Airline.objects.update_or_create(airline_id=airline_id,
-                                                 defaults=defaults)
+    try:
+        airline, _ = Airline.objects.update_or_create(airline_id=airline_id,
+                                                     defaults=defaults)
+    except Exception as e:
+        import ipdb; ipdb.set_trace();
 
     return airline
 
 def load_route(row):
-    row_cleaned = ['' if i == '\N' else i for i in row]
     (
         _, airline_id,
         _, source_airport_id,
@@ -51,7 +61,7 @@ def load_route(row):
         codeshare,
         stops,
         equipment,
-    ) = row_cleaned
+    ) = clean_row(row)
 
     if not all([airline_id, source_airport_id, dest_airport_id]):
         return
