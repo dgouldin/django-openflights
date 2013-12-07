@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+import math
+
 from django.db import models
 
 from .managers import BaseManager
@@ -40,6 +42,20 @@ class Airport(models.Model):
     def __unicode__(self):
         return '{0} ({1})'.format(self.name, self.iata_faa)
 
+    def distance_to(self, airport):
+        EARTH_RADIUS = 3958.761 # in miles
+        lat1 = self.latitude
+        lon1 = self.longitude
+        lat2 = airport.latitude
+        lon2 = airport.longitude
+
+        d_lat = math.radians(lat2 - lat1)
+        d_lon = math.radians(lon2 - lon1)
+        a = (math.sin(d_lat / 2) * math.sin(d_lat / 2) +
+                math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) *
+                math.sin(d_lon / 2) * math.sin(d_lon / 2))
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+        return int(EARTH_RADIUS * c)
 
 class Airline(models.Model):
     airline_id = models.PositiveSmallIntegerField(unique=True)
@@ -65,6 +81,7 @@ class Route(models.Model):
     codeshare = models.BooleanField()
     stops = models.IntegerField()
     equipment = models.CharField(max_length=1000)
+    distance = models.IntegerField()
 
     objects = BaseManager()
 
@@ -77,3 +94,11 @@ class Route(models.Model):
         return '{0}: {1} -> {2}'.format(self.airline.callsign,
                                         self.source_airport.iata_faa,
                                         self.destination_airport.iata_faa)
+
+    def refresh_distance(self):
+        self.distance = self.source_airport.distance_to(self.destination_airport)
+
+    def save(self, force_refresh_distance=False, *args, **kwargs):
+        if self.distance is None or force_refresh_distance:
+            self.refresh_distance()
+        super(Route, self).save(*args, **kwargs)

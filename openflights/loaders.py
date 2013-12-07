@@ -60,6 +60,7 @@ def load_route(row):
     source_airport = Airport.objects.get(airport_id=source_airport_id)
     dest_airport = Airport.objects.get(airport_id=dest_airport_id)
     codeshare = codeshare == 'Y'
+    distance = source_airport.distance_to(dest_airport)
 
     route, _ = Route.objects.update_or_create(airline=airline,
                                               source_airport=source_airport,
@@ -68,6 +69,7 @@ def load_route(row):
                                                   'codeshare': codeshare,
                                                   'stops': stops,
                                                   'equipment': equipment,
+                                                  'distance': distance,
                                               })
 
     return route
